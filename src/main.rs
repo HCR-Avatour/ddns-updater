@@ -5,6 +5,8 @@ use std::time::Duration;
 use anyhow::{anyhow, Error};
 use tokio::time::sleep;
 use clap::Parser;
+use log::{error, info, LevelFilter};
+use simplelog::{ColorChoice, Config, TerminalMode, TermLogger};
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
@@ -20,7 +22,7 @@ struct Args {
 
 fn print_error(error: Error, previous_error: &mut Option<Error>) {
     if previous_error.is_none() || previous_error.as_ref().unwrap().to_string() != error.to_string() {
-        println!("{error}");
+        error!("{error}");
         previous_error.replace(error);
     }
 }
@@ -28,6 +30,9 @@ fn print_error(error: Error, previous_error: &mut Option<Error>) {
 #[tokio::main]
 async fn main() {
     let args = Args::parse();
+    TermLogger::init(LevelFilter::Info, Config::default(), TerminalMode::Stdout, ColorChoice::Auto)
+        .expect("Failed to set up logger");
+
     let ddns_client = duckdns::Client::new(args.domain, args.token);
 
     let mut previous_ipv4 = None;
@@ -37,7 +42,7 @@ async fn main() {
         match network::get_addresses().await {
             Ok((ipv4, ipv6)) => {
                 if ipv4 != previous_ipv4 || ipv6 != previous_ipv6 {
-                    println!("Updating to {ipv4:?}, {ipv6:?}");
+                    info!("Updating to {ipv4:?}, {ipv6:?}");
                     if let Err(e) = ddns_client.update(ipv4, ipv6).await {
                         let error = anyhow!("Failed to update DuckDNS: {}", e);
                         print_error(error, &mut previous_error);
