@@ -5,7 +5,7 @@ use std::time::Duration;
 use anyhow::{anyhow, Error};
 use tokio::time::sleep;
 use clap::Parser;
-use log::{error, info, LevelFilter};
+use log::{error, LevelFilter, warn};
 use simplelog::{ColorChoice, Config, TerminalMode, TermLogger};
 
 #[derive(Parser, Debug)]
@@ -42,7 +42,7 @@ async fn main() {
         match network::get_addresses().await {
             Ok((ipv4, ipv6)) => {
                 if ipv4 != previous_ipv4 || ipv6 != previous_ipv6 {
-                    info!("Updating to {ipv4:?}, {ipv6:?}");
+                    warn!("Updating to {ipv4:?}, {ipv6:?}");
                     if let Err(e) = ddns_client.update(ipv4, ipv6).await {
                         let error = anyhow!("Failed to update DuckDNS: {}", e);
                         print_error(error, &mut previous_error);
