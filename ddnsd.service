@@ -7,7 +7,7 @@ StartLimitIntervalSec=0
 Type=simple
 Restart=always
 RestartSec=1
-ExecStart=/usr/bin/ddnsd
+ExecStart=/usr/bin/ddnsd --domain avatour --token 0ccdbbb3-ad82-46dd-a1e9-4c8df177b943
 
 [Install]
 WantedBy=multi-user.target
