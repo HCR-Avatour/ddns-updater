@@ -18,6 +18,10 @@ struct Args {
     /// The DuckDNS token
     #[arg(long)]
     token: String,
+
+    /// The network interface to use
+    #[arg(long)]
+    interface: Option<String>,
 }
 
 fn print_error(error: Error, previous_error: &mut Option<Error>) {
@@ -39,7 +43,7 @@ async fn main() {
     let mut previous_ipv6 = None;
     let mut previous_error: Option<Error> = None;
     loop {
-        match network::get_addresses().await {
+        match network::get_addresses(&args.interface).await {
             Ok((ipv4, ipv6)) => {
                 if ipv4 != previous_ipv4 || ipv6 != previous_ipv6 {
                     warn!("Updating to {ipv4:?}, {ipv6:?}");
